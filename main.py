@@ -1,11 +1,21 @@
-import requests
-import pandas as pd
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
+import os
+
 import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
+import pandas as pd
+import requests
+from dotenv import load_dotenv  # ВСТАВИТЬ ДЛЯ ЗАГРУЗКИ ПЕРЕМЕННЫХ ИЗ .env
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+# ВСТАВЬТЕ ЭТОТ БЛОК ДЛЯ ЗАГРУЗКИ ПЕРЕМЕННОЙ ИЗ ФАЙЛА .env
+load_dotenv()  # Загружаем переменные из .env
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')  # Получаем ключ API из переменной окружения
+
+# Проверка, что API-ключ загружен
+if not GOOGLE_API_KEY:
+    raise ValueError("API-ключ не найден! Пожалуйста, проверьте файл .env.")
 
 
-# ВСТАВИТЬ API - ФУНКЦИЯ ДЛЯ ЗАПРОСА К ГЕМИНИ
+# ВСТАВИТЬ API - ФУНКЦИЯ ДЛЯ ЗАПРОСА К ГЕМИНИ (ПОСЛЕ ИМПОРТОВ)
 def get_current_usage_from_gemini(symbol="btcusd"):
     """Получение текущего аналога загруженности через API Gemini."""
     url = f"https://api.gemini.com/v1/pubticker/{symbol}"
@@ -46,10 +56,10 @@ if 'usage' in hourly_data.columns and not hourly_data['usage'].isnull().any():
     print("Часы пик:")
     print(forecast_peak_hours)
 
-    # ВСТАВИТЬ API - ИСПОЛЬЗУЕМ ЗНАЧЕНИЕ С ГЕМИНИ ДЛЯ АКТУАЛЬНОЙ КОРРЕКЦИИ ВРЕМЕНИ ПРИБЫТИЯ
+    # ВСТАВИТЬ ВЫЗОВ API - ИСПОЛЬЗУЕМ ЗНАЧЕНИЕ С ГЕМИНИ ДЛЯ АКТУАЛЬНОЙ КОРРЕКЦИИ ВРЕМЕНИ ПРИБЫТИЯ
     current_usage = get_current_usage_from_gemini("btcusd")
 
-    # Коррекция расписания на основе текущей загруженности
+    # Коррекция расписания на основе текущей загруженности (ПОСЛЕ ВЫЗОВА API)
     arrival_interval = forecast.apply(lambda x: 20 if x > peak_threshold else 10)
     # Если текущая загруженность больше порога, добавляем задержку
     if current_usage > peak_threshold:
